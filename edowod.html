@@ -1,56 +1,54 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-dowód</title>
-    <style>
-      body {
-        text-align: center;
-      }
+document.getElementById('loveForm').addEventListener('submit', function(event) {
+  event.preventDefault();
 
-        canvas {
-            border: 1px solid #000;
-        }
-  </style>
-</head>
-<body>
-    <h2>
-     <img src="https://duckduckgo.com/i/e3cc2cfa6d7bdf63.png" width="3%"/> Twój dokument tożsamości 
-  </h2> <br>
-    <canvas id="id-card" width="1180" height="716"></canvas>
-    <script>
-        window.onload = function() {
-            const urlParams = new URLSearchParams(window.location.search);
+  const name1 = document.getElementById('name1').value.trim().toLowerCase();
+  const name2 = document.getElementById('name2').value.trim().toLowerCase();
 
-            const canvas = document.getElementById('id-card');
-            const ctx = canvas.getContext('2d');
+  const specialPairs = [
+    { first: "amelia", second: "dominik" },
+    { first: "amelka", second: "dominik" },
+    { first: "amelcia", second: "dominik" }
+  ];
 
-            const image = new Image();
-            image.src = 'https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fi.gremicdn.pl%2Fimage%2Ffree%2F44199a780e7a374c575f6d406d16d8bc%2F%3Ft%3Dresize%3Afill%3A1200%3A716%2Cenlarge%3A1&f=1&nofb=1&ipt=876598be523e7ca4731f3221b8d52d100f72c3575952e10f01c1d1ec1eaf534f&ipo=images'; // Zastąp ścieżkę do obrazu wzoru dowodu osobistego
-            image.onload = function() {
-                ctx.drawImage(image, 0, 0);
+  const badPairs = [
+    { first: "amelia", second: "szymon" },
+    { first: "amelka", second: "szymon" },
+    { first: "amelcia", second: "szymon" }
+  ];
 
+  let resultText;
+  const resultDiv = document.getElementById('result');
 
-                ctx.font = 'bold 24px Arial';
-                ctx.fillStyle = 'black';
+  // Check for bad pairs
+  const isBadPair = badPairs.some(pair =>
+    (pair.first === name1 && pair.second === name2) ||
+    (pair.first === name2 && pair.second === name1)
+  );
 
-                ctx.fillText(urlParams.get('surname'), 443, 190); // Zastąp odpowiednimi współrzędnymi
-                ctx.fillText(urlParams.get('given-names'), 443, 280); // Zastąp odpowiednimi współrzędnymi
-                ctx.fillText(urlParams.get('citizenship'), 443, 360); // Zastąp odpowiednimi współrzędnymi
-                ctx.fillText(urlParams.get('birthdate'), 783, 360); // Zastąp odpowiednimi współrzędnymi
-                ctx.fillText(urlParams.get('id-number'), 443, 460); // Zastąp odpowiednimi współrzędnymi
-                ctx.fillText(urlParams.get('gender'), 783, 440); // Zastąp odpowiednimi współrzędnymi
-                ctx.fillText(urlParams.get('expiry-date'), 443, 540); // Zastąp odpowiednimi współrzędnymi
-                ctx.fillText(urlParams.get('can-number'), 923, 635); // Zastąp odpowiednimi współrzędnymi
+  if (isBadPair) {
+    resultText = `Miłość między ${capitalize(name1)} i ${capitalize(name2)} wynosi 0%! 👎🏻👎🏻👎🏻`;
+    resultDiv.classList.add('shake'); // Add shake animation
+  } else {
+    // Check for special pairs
+    const isSpecialPair = specialPairs.some(pair =>
+      (pair.first === name1 && pair.second === name2) ||
+      (pair.first === name2 && pair.second === name1)
+    );
 
-                const photo = new Image();
-                photo.src = urlParams.get('photo');
-                photo.onload = function() {
-                    ctx.drawImage(photo, 850, 50, 200, 250); // Zastąp odpowiednimi współrzędnymi i rozmiarami
-                };
-            };
-        };
-    </script>
-</body>
-</html>
+    if (isSpecialPair) {
+      resultDiv.classList.remove('shake'); // Remove shake if present
+      resultText = `Miłość między ${capitalize(name1)} i ${capitalize(name2)} wynosi 100%! ❤️`;
+    } else {
+      resultDiv.classList.remove('shake'); // Remove shake if present
+      const randomPercentage = Math.floor(Math.random() * 101);
+      resultText = `Miłość między ${capitalize(name1)} i ${capitalize(name2)} wynosi ${randomPercentage}%.`;
+    }
+  }
+
+  resultDiv.textContent = resultText;
+});
+
+// Capitalize the first letter of names
+function capitalize(name) {
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
