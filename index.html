@@ -1,30 +1,205 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced Clicker Game</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kalkulator – matematyka i fizyka</title>
+  <link rel="manifest" href="manifest.json" />
+  <!-- Material Design Lite -->
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+  <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <style>
+    body {
+      background: #f2f3f7;
+      font-family: 'Roboto', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 420px;
+      margin: 32px auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 6px 24px rgba(33, 150, 243, 0.14);
+      padding: 24px 18px 18px 18px;
+    }
+    h1 {
+      text-align: center;
+      color: #1976d2;
+      font-weight: 700;
+      margin-bottom: 0.5em;
+      letter-spacing: .5px;
+    }
+    .mdl-textfield {
+      width: 100%;
+    }
+    .mdl-button--fab {
+      position: fixed;
+      bottom: 27px;
+      right: 27px;
+      z-index: 100;
+      background: #1976d2 !important;
+    }
+    #result {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #e3f2fd;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1.12em;
+      word-break: break-word;
+      min-height: 30px;
+    }
+    @media (max-width: 600px) {
+      .container {
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+        min-height: 100vh;
+        padding: 12px 4px 14px 4px;
+      }
+      h1 {
+        font-size: 1.5em;
+      }
+    }
+  </style>
 </head>
 <body>
-  <div id="game-container">
-    <h1>Advanced Clicker Game</h1>
-    <p id="points-display">Punkty: <span id="points">0</span></p>
-    <button id="click-button" class="btn">Kliknij!</button>
-
-    <div id="shop">
-      <h2>Sklep</h2>
-      <ul id="upgrades-list">
-        <!-- Ulepszenia będą dodawane dynamicznie -->
-      </ul>
-    </div>
-
-    <div id="stats">
-      <h2>Statystyki</h2>
-      <p>Kliknięcia: <span id="clicks">0</span></p>
-      <p>Punkty na sekundę: <span id="pps">0</span></p>
-    </div>
+  <div class="container mdl-shadow--2dp">
+    <h1>Kalkulator</h1>
+    <form id="calcForm" autocomplete="off">
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+        <select class="mdl-textfield__input" id="category" required>
+          <option value="" disabled selected>Wybierz kategorię</option>
+          <option value="fizyka">Fizyka</option>
+          <option value="matematyka_podstawowa">Matematyka – podstawowa</option>
+          <option value="trygonometria">Trygonometria</option>
+          <option value="potegi_pierwiastki">Potęgi i pierwiastki</option>
+          <option value="logarytmy">Logarytmy</option>
+          <!-- Możesz dodać więcej działów! -->
+        </select>
+        <label class="mdl-textfield__label" for="category">Kategoria</label>
+      </div>
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+        <select class="mdl-textfield__input" id="formula" disabled required>
+          <option value="" disabled selected>Wybierz wzór</option>
+        </select>
+        <label class="mdl-textfield__label" for="formula">Wzór</label>
+      </div>
+      <div id="inputs"></div>
+      <button type="submit" id="calculateBtn" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" style="width:100%;margin-top:1em;" disabled>
+        Oblicz
+      </button>
+      <div id="result" aria-live="polite"></div>
+    </form>
   </div>
-  <script src="script.js"></script>
+  <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect" title="Przewiń do góry" onclick="window.scrollTo({top:0,behavior:'smooth'});">
+    <i class="material-icons">arrow_upward</i>
+  </button>
+  <script>
+    // Nowe działy i wzory!
+    const formulas = {
+      fizyka: {
+        s: { name: "Droga (s = v × t)", inputs: ["v", "t"], formula: (v,t) => v*t, description: "s = v × t" },
+        v: { name: "Prędkość (v = s / t)", inputs: ["s", "t"], formula: (s,t) => s/t, description: "v = s / t" },
+        t: { name: "Czas (t = s / v)", inputs: ["s", "v"], formula: (s,v) => s/v, description: "t = s / v" }
+        // Możesz dodać kolejne wzory z fizyki!
+      },
+      matematyka_podstawowa: {
+        suma: { name: "Suma (a + b)", inputs: ["a", "b"], formula: (a,b) => a+b, description: "a + b" },
+        roznica: { name: "Różnica (a - b)", inputs: ["a", "b"], formula: (a,b) => a-b, description: "a - b" },
+        iloczyn: { name: "Iloczyn (a × b)", inputs: ["a", "b"], formula: (a,b) => a*b, description: "a × b" },
+        iloraz: { name: "Iloraz (a / b)", inputs: ["a", "b"], formula: (a,b) => b !== 0 ? a/b : 'Nie dziel przez 0!', description: "a / b" },
+        procenty: { name: "Procenty (a% z b)", inputs: ["a", "b"], formula: (a,b) => (a/100)*b, description: "a% z b" }
+      },
+      trygonometria: {
+        sin: { name: "sin(α)", inputs: ["alfa"], formula: (a) => Math.sin(a*Math.PI/180), description: "sin(α)" },
+        cos: { name: "cos(α)", inputs: ["alfa"], formula: (a) => Math.cos(a*Math.PI/180), description: "cos(α)" },
+        tg: { name: "tg(α)", inputs: ["alfa"], formula: (a) => Math.tan(a*Math.PI/180), description: "tg(α)" },
+        ctg: { name: "ctg(α)", inputs: ["alfa"], formula: (a) => 1/Math.tan(a*Math.PI/180), description: "ctg(α)" }
+      },
+      potegi_pierwiastki: {
+        potega: { name: "a^b (potęgowanie)", inputs: ["a", "b"], formula: (a,b) => Math.pow(a,b), description: "a^b" },
+        pierwiastek: { name: "√a (pierwiastek kwadratowy)", inputs: ["a"], formula: (a) => a >= 0 ? Math.sqrt(a) : 'Błąd: liczba < 0', description: "√a" }
+      },
+      logarytmy: {
+        log10: { name: "log₁₀(a)", inputs: ["a"], formula: (a) => a > 0 ? Math.log10(a) : 'Błąd: liczba ≤ 0', description: "log₁₀(a)" },
+        ln: { name: "ln(a)", inputs: ["a"], formula: (a) => a > 0 ? Math.log(a) : 'Błąd: liczba ≤ 0', description: "ln(a)" }
+      }
+      // Dodaj kolejne działy i wzory według potrzeb!
+    };
+
+    const category = document.getElementById('category');
+    const formula = document.getElementById('formula');
+    const inputsDiv = document.getElementById('inputs');
+    const calcBtn = document.getElementById('calculateBtn');
+    const resultDiv = document.getElementById('result');
+
+    category.addEventListener('change', () => {
+      formula.innerHTML = '<option value="" disabled selected>Wybierz wzór</option>';
+      formula.disabled = false;
+      inputsDiv.innerHTML = "";
+      calcBtn.disabled = true;
+      resultDiv.textContent = "";
+      if(formulas[category.value]) {
+        Object.entries(formulas[category.value]).forEach(([key, val]) => {
+          let opt = document.createElement('option');
+          opt.value = key;
+          opt.textContent = val.name;
+          formula.appendChild(opt);
+        });
+      }
+    });
+
+    formula.addEventListener('change', () => {
+      inputsDiv.innerHTML = "";
+      calcBtn.disabled = false;
+      resultDiv.textContent = "";
+      const catVal = category.value;
+      const formVal = formula.value;
+      if(formulas[catVal] && formulas[catVal][formVal]) {
+        formulas[catVal][formVal].inputs.forEach(input => {
+          let div = document.createElement('div');
+          div.className = 'mdl-textfield mdl-js-textfield mdl-textfield--floating-label';
+          let inp = document.createElement('input');
+          inp.className = 'mdl-textfield__input';
+          inp.type = 'number';
+          inp.step = 'any';
+          inp.id = input;
+          inp.required = true;
+          let label = document.createElement('label');
+          label.className = 'mdl-textfield__label';
+          label.htmlFor = input;
+          label.textContent = input.toUpperCase();
+          div.appendChild(inp);
+          div.appendChild(label);
+          inputsDiv.appendChild(div);
+        });
+        window.componentHandler.upgradeDom();
+      }
+    });
+
+    document.getElementById('calcForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const catVal = category.value;
+      const formVal = formula.value;
+      let args = [];
+      const formInputs = inputsDiv.querySelectorAll('input');
+      for(let inp of formInputs){
+        let val = inp.valueAsNumber;
+        if(isNaN(val)){
+          resultDiv.textContent = "Uzupełnij wszystkie pola liczbami!";
+          return;
+        }
+        args.push(val);
+      }
+      let res = formulas[catVal][formVal].formula(...args);
+      resultDiv.textContent = `${formulas[catVal][formVal].description}: ${res}`;
+    });
+  </script>
+  <!-- Material icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 </body>
 </html>
